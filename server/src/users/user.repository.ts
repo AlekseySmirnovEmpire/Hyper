@@ -25,7 +25,17 @@ export class UserRepository implements IUserRepository {
         return this.prismaService.client.userModel.findFirst({
             where: {
                 email
-            }
+            },
+            include: {RefreshToken: true}
+        });
+    }
+
+    findById(id: string): Promise<UserModel | null> {
+        return this.prismaService.client.userModel.findFirst({
+            where: {
+                id
+            },
+            include: {RefreshToken: true}
         });
     }
 
