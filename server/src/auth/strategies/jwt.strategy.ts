@@ -2,7 +2,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import {Injectable, UnauthorizedException} from '@nestjs/common';
 import * as process from "process";
-import {AuthService} from "./auth.service";
+import {AuthService} from "../auth.service";
 import * as dotenv from 'dotenv';
 dotenv.config();
 

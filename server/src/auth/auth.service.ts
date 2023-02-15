@@ -1,13 +1,18 @@
-import {Inject, Injectable} from '@nestjs/common';
+import {BadRequestException, Inject, Injectable, UnauthorizedException} from '@nestjs/common';
 import {JwtService} from "@nestjs/jwt";
 import {IUserRepository, USER_REPOSITORY} from "../users/user.repository.interface";
 import {UserEntity} from "../users/user.entity";
-import {UserModel} from "@prisma/client";
+import {UserModel, RefreshToken} from "@prisma/client";
+import {RefreshTokenEntity} from "../refreshToken/refresh-token.entity";
+import {LoginDto} from "../users/dto/login.dto";
+import {IRefreshTokenService, REFRESH_TOKEN_SERVICE} from "../refreshToken/refresh-token.service.interface";
+import {sign, verify} from "jsonwebtoken";
 
 @Injectable()
 export class AuthService {
     constructor(
         @Inject(USER_REPOSITORY) private readonly userRepository: IUserRepository,
+        @Inject(REFRESH_TOKEN_SERVICE) private readonly refreshTokenService: IRefreshTokenService,
         private readonly jwtService: JwtService) {
     }
 
@@ -29,14 +34,72 @@ export class AuthService {
         }
     }
 
-    async login(user: UserModel): Promise<{user: UserModel, access_token: string}> {
-        const payload = {
-            user
+    async login({email, password}: LoginDto): Promise<{ accessToken: string; refreshToken: string }> {
+        const user = await this.validateUser(email, password);
+        if (!user) {
+            throw new BadRequestException();
+        }
+        // need to create this method
+        return this.newRefreshAndAccessToken(user);
+    }
+
+    async refresh(refreshStr: string): Promise<{accessToken: string}> {
+        const refreshToken = await this.retrieveRefreshToken(refreshStr);
+        if (!refreshToken) {
+            throw new BadRequestException();
         }
 
+        const user = await this.userRepository.findById(refreshToken.userId);
+        if (!user) {
+            throw new BadRequestException();
+        }
+
+        const accessToken = {
+            email: user.email,
+            password: user.password
+        };
+
         return {
-            user: user,
-            access_token: this.jwtService.sign(payload)
+            accessToken: sign(accessToken, process.env.JWTSECRET, { expiresIn: '1h' })
+        };
+    }
+
+    async logout(refreshStr: string): Promise<void> {
+        const refreshToken = await this.retrieveRefreshToken(refreshStr);
+        if (!refreshToken) {
+            throw new UnauthorizedException();
+        }
+
+        await this.refreshTokenService.removeToken(refreshToken.id);
+    }
+
+    private retrieveRefreshToken(refreshStr: string,): Promise<RefreshToken | null> {
+        try {
+            const decoded = verify(refreshStr, process.env.JWT_REFRESH);
+            if (typeof decoded === 'string') {
+                return null;
+            }
+            return Promise.resolve(
+                this.refreshTokenService.findToken(decoded.id),
+            );
+        } catch (ex) {
+            return null;
+        }
+    }
+
+    private async newRefreshAndAccessToken(user: UserModel): Promise<{ accessToken: string; refreshToken: string }> {
+        const refreshObject = new RefreshTokenEntity(user);
+
+        await this.refreshTokenService.addToken(refreshObject);
+
+        return {
+            refreshToken: refreshObject.sign(),
+            accessToken: this.jwtService.sign(
+                {
+                    email: user.email,
+                    password: user.password
+                }
+            ),
         };
     }
 }

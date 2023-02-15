@@ -6,9 +6,15 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     client: PrismaClient;
     constructor() {
         super();
-        this.client = new PrismaClient();
+        this.client = new PrismaClient({
+            log: [
+                { level: 'warn', emit: 'event' },
+                { level: 'info', emit: 'event' },
+                { level: 'error', emit: 'event' },
+            ],
+        });
     }
-    async onModuleInit() {
+    async onModuleInit(): Promise<void> {
         await this.$connect();
     }
 
