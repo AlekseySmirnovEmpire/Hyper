@@ -1,34 +1,37 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import React from 'react';
+import {useState} from 'react'
+import {Routes, Route} from "react-router-dom";
+import {Container} from "react-bootstrap";
+import Home from "./pages/Home";
+import Navbar from "./components/Navbar";
+import Tournaments from "./pages/Tournaments";
+import Players from "./pages/Players";
+import Rules from "./pages/Rules";
+import Reviews from "./pages/Reviews";
+import Auth from "./pages/Auth";
+import Registration from "./pages/Registration";
+import NotFound from "./pages/NotFound";
 
 function App() {
-  const [count, setCount] = useState(0)
+    const [count, setCount] = useState(0)
 
-  return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
-  )
+    return (
+        <>
+            <Navbar/>
+            <Container className="mb-4">
+                <Routes>
+                    <Route path="/" element={<Home/>}/>
+                    <Route path="/tournaments" element={<Tournaments/>}/>
+                    <Route path="/players" element={<Players/>}/>
+                    <Route path="/rules" element={<Rules />}/>
+                    <Route path="/reviews" element={<Reviews />}/>
+                    <Route path="/auth" element={<Auth />}/>
+                    <Route path="/registration" element={<Registration />}/>
+                    <Route path="*" element={<NotFound />} />
+                </Routes>
+            </Container>
+        </>
+    )
 }
 
 export default App
