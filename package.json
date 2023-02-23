@@ -48,10 +48,11 @@
     "typescript": "^4.9.5"
   },
   "scripts": {
-    "dev:client": "npm run --prefix client build",
+    "dev:client": "npm run --prefix client dev",
+    "dev:client:debug": "npm run --prefix client dev",
     "dev:server": "npm run --prefix server start:dev",
     "dev:server:debug": "npm run --prefix server start:debug",
-    "dev:debug": "concurrently --kill-others \"npm run dev:client\" \"npm run dev:server:debug\"",
+    "dev:debug": "concurrently --kill-others \"dev:client:debug\" \"npm run dev:server:debug\"",
     "dev": "concurrently --kill-others \"npm run dev:client\" \"npm run dev:server\""
   },
   "repository": {
