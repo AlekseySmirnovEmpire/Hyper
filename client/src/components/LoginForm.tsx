@@ -1,15 +1,24 @@
 import React, {FC, useContext, useState} from 'react';
-import {Button, Form} from "react-bootstrap";
+import {Alert, Button, Form} from "react-bootstrap";
 import {AuthContext} from "../main";
 import {observer} from 'mobx-react-lite';
 
 const LoginForm: FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [errors, setErrors] = useState(false);
     const {auth} = useContext(AuthContext);
+    const login = async () => {
+        setErrors(false);
+        if(!(await auth.login(email, password))) {
+            setErrors(true);
+            return;
+        }
+    };
 
     return (
         <Form onSubmit={(event) => {event.preventDefault()}}>
+            {errors && <Alert variant={'danger'}>Неверно введён пароль или логин!</Alert>}
             <Form.Group className="mb-3" controlId="formBasicEmail">
                 <Form.Label className={'text-warning'}>Email:</Form.Label>
                 <Form.Control
@@ -32,7 +41,7 @@ const LoginForm: FC = () => {
             <Button
                 variant="warning"
                 type="submit"
-                onClick={() => auth.login(email, password)}
+                onClick={login}
             >
                 Войти
             </Button>

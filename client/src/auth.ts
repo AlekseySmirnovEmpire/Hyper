@@ -1,9 +1,10 @@
 import {UserModel} from "@prisma/client";
 import {makeAutoObservable} from "mobx";
 import AuthService from "./services/AuthService";
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 import {IAuthResponse} from "./models/response/IAuthResponse";
 import {API_URL} from "./http/api";
+import {useNavigate} from "react-router-dom";
 
 export default class AuthCon {
     user: UserModel = {} as UserModel;
@@ -25,24 +26,26 @@ export default class AuthCon {
         this.isLoading = bool;
     }
 
-    async login(email: string, password: string): Promise<void> {
+    async login(email: string, password: string): Promise<boolean> {
         try {
             const response = await AuthService.login(email, password);
             console.log(response.data);
             localStorage.setItem('jwt-token', response.data.accessToken);
             this.setAuth(true);
             this.setUser(response.data.user);
+            return true;
         } catch (e) {
-            console.log(e);
+            return false;
         }
     }
 
-    async registration(firstName: string, lastName: string, nickName: string, email: string, password: string): Promise<void> {
+    async registration(firstName: string, lastName: string, nickName: string, email: string, password: string): Promise<boolean> {
         try {
             const response = await AuthService.registration(firstName, lastName, nickName, email, password);
             this.setUser(response.data.user);
+            return true;
         } catch (ex) {
-            console.log(ex);
+            return false;
         }
     }
 
