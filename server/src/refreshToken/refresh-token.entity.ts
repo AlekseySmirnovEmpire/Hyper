@@ -11,6 +11,6 @@ export class RefreshTokenEntity {
     userId: string;
     user: UserModel;
     sign(): string {
-        return sign({ ...this }, process.env.JWT_REFRESH);
+        return sign({ ...this }, process.env.JWT_REFRESH, {expiresIn: '30d'});
     }
 }
