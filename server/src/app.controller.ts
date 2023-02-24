@@ -5,13 +5,16 @@ import {
     HttpStatus,
     Inject,
     Post,
-    Delete
+    Delete,
+    Response,
+    Get,
+    Request, BadRequestException
 } from '@nestjs/common';
 import {IUserService, USER_SERVICE} from "./users/user.service.interface";
 import {RegisterDto} from "./users/dto/register.dto";
 import {AuthService} from "./auth/auth.service";
 import {LoginDto} from "./users/dto/login.dto";
-import {RefreshTokenDto} from "./refreshToken/dto/refresh-token.dto";
+import {UserModel} from "@prisma/client";
 
 @Controller('auth')
 export class AppController {
@@ -21,29 +24,45 @@ export class AppController {
     }
 
     @Post('login')
-    async login(@Body() dto: LoginDto): Promise<{accessToken: string, refreshToken: string}> {
-        return await this.authService.login(dto);
+    async login(@Response() res, @Body() dto: LoginDto): Promise<{accessToken: string, user: UserModel}> {
+        const tokens = await this.authService.login(dto);
+        res.cookie('refreshToken', tokens.refreshToken, {
+            maxAge: 30 * 24 * 60 * 60 * 1000,
+            httpOnly: true
+        });
+
+        return res.send({
+            accessToken: tokens.accessToken,
+            user: tokens.user
+        });
     }
 
-    @Post('refresh')
-    async refresh(@Body() token: RefreshTokenDto): Promise<{accessToken: string}> {
-        return this.authService.refresh(token.refreshToken);
+    @Get('refresh')
+    async refresh(@Request() req): Promise<{accessToken: string, user: UserModel}> {
+        try {
+            return this.authService.refresh(req.cookies['refreshToken']);
+        } catch (ex) {
+            throw new BadRequestException(ex);
+        }
     }
 
     @Delete('logout')
-    async logout(@Body() token: RefreshTokenDto): Promise<void> {
-        return this.authService.logout(token.refreshToken);
+    async logout(@Response() res, @Request() req): Promise<void> {
+        await this.authService.logout(req.cookies['refreshToken']);
+        res.clearCookie('refreshToken');
+
+        return res.send();
     }
 
     @Post('register')
-    async register(@Body() dto: RegisterDto) {
+    async register(@Body() dto: RegisterDto): Promise<{user: UserModel}> {
         const result = await this.userService.createUser(dto);
         if (!result) {
             throw new HttpException('Unprocessable Entity', HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         return {
-            email: result.email
+            user: result
         };
     }
 }

@@ -34,16 +34,19 @@ export class AuthService {
         }
     }
 
-    async login({email, password}: LoginDto): Promise<{ accessToken: string; refreshToken: string }> {
+    async login({email, password}: LoginDto): Promise<{ accessToken: string; refreshToken: string; user: UserModel }> {
         const user = await this.validateUser(email, password);
         if (!user) {
             throw new BadRequestException();
         }
         // need to create this method
-        return this.newRefreshAndAccessToken(user);
+        return await this.newRefreshAndAccessToken(user);
     }
 
-    async refresh(refreshStr: string): Promise<{accessToken: string}> {
+    async refresh(refreshStr: string | undefined | null): Promise<{accessToken: string, user: UserModel}> {
+        if (!refreshStr) {
+            throw new BadRequestException();
+        }
         const refreshToken = await this.retrieveRefreshToken(refreshStr);
         if (!refreshToken) {
             throw new BadRequestException();
@@ -60,7 +63,8 @@ export class AuthService {
         };
 
         return {
-            accessToken: sign(accessToken, process.env.JWTSECRET, { expiresIn: '1h' })
+            accessToken: sign(accessToken, process.env.JWTSECRET, { expiresIn: '1h' }),
+            user
         };
     }
 
@@ -87,7 +91,7 @@ export class AuthService {
         }
     }
 
-    private async newRefreshAndAccessToken(user: UserModel): Promise<{ accessToken: string; refreshToken: string }> {
+    private async newRefreshAndAccessToken(user: UserModel): Promise<{ accessToken: string; refreshToken: string; user: UserModel }> {
         const refreshObject = new RefreshTokenEntity(user);
 
         await this.refreshTokenService.addToken(refreshObject);
@@ -100,6 +104,7 @@ export class AuthService {
                     password: user.password
                 }
             ),
+            user
         };
     }
 }

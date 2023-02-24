@@ -1,5 +1,4 @@
-import React from 'react';
-import {useState} from 'react'
+import React, {FC, useContext, useEffect} from 'react';
 import {Routes, Route} from "react-router-dom";
 import {Container} from "react-bootstrap";
 import Home from "./pages/Home";
@@ -11,9 +10,17 @@ import Reviews from "./pages/Reviews";
 import Auth from "./pages/Auth";
 import Registration from "./pages/Registration";
 import NotFound from "./pages/NotFound";
+import {AuthContext} from "./main";
+import {observer} from "mobx-react-lite";
 
-function App() {
-    const [count, setCount] = useState(0)
+const App: FC = () => {
+    const {auth} = useContext(AuthContext);
+
+    useEffect(() => {
+        if (localStorage.getItem('jwt-token') && !auth.isAuth) {
+            auth.checkAuth().then();
+        }
+    });
 
     return (
         <>
@@ -23,15 +30,15 @@ function App() {
                     <Route path="/" element={<Home/>}/>
                     <Route path="/tournaments" element={<Tournaments/>}/>
                     <Route path="/players" element={<Players/>}/>
-                    <Route path="/rules" element={<Rules />}/>
-                    <Route path="/reviews" element={<Reviews />}/>
-                    <Route path="/auth" element={<Auth />}/>
-                    <Route path="/registration" element={<Registration />}/>
-                    <Route path="*" element={<NotFound />} />
+                    <Route path="/rules" element={<Rules/>}/>
+                    <Route path="/reviews" element={<Reviews/>}/>
+                    <Route path="/auth" element={<Auth/>}/>
+                    <Route path="/registration" element={<Registration/>}/>
+                    <Route path="*" element={<NotFound/>}/>
                 </Routes>
             </Container>
         </>
-    )
+    );
 }
 
-export default App
+export default observer(App);
