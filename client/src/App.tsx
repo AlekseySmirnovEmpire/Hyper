@@ -1,5 +1,5 @@
 import React, {FC, useContext, useEffect} from 'react';
-import {Routes, Route} from "react-router-dom";
+import {Routes, Route, Navigate} from "react-router-dom";
 import {Container} from "react-bootstrap";
 import Home from "./pages/Home";
 import Navbar from "./components/Navbar";
@@ -12,6 +12,7 @@ import Registration from "./pages/Registration";
 import NotFound from "./pages/NotFound";
 import {AuthContext} from "./main";
 import {observer} from "mobx-react-lite";
+import Error from "./pages/Error";
 
 const App: FC = () => {
     const {auth} = useContext(AuthContext);
@@ -32,8 +33,9 @@ const App: FC = () => {
                     <Route path="/players" element={<Players/>}/>
                     <Route path="/rules" element={<Rules/>}/>
                     <Route path="/reviews" element={<Reviews/>}/>
-                    <Route path="/auth" element={<Auth/>}/>
-                    <Route path="/registration" element={<Registration/>}/>
+                    <Route path="/auth" element={!auth.isAuth ? <Auth/> : <Navigate to={'/'}/>}/>
+                    <Route path="/registration" element={auth.isAuth ? <Navigate to={'/'}/> : <Registration/>}/>
+                    <Route path={'/error'} element={<Error/>}/>
                     <Route path="*" element={<NotFound/>}/>
                 </Routes>
             </Container>

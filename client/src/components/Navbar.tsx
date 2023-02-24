@@ -1,12 +1,16 @@
-import React, {useEffect, useState} from 'react';
+import React, {FC, useContext, useEffect, useState} from 'react';
 import {Container, Nav, Navbar as NavbarBs, NavbarBrand, Offcanvas} from 'react-bootstrap'
 import {NavLink} from "react-router-dom";
 import 'font-awesome/css/font-awesome.min.css';
+import {observer} from "mobx-react-lite";
+import {AuthContext} from "../main";
+import UserBar from "./UserBar";
 
-const Navbar = () => {
+const Navbar: FC = () => {
     const [show, setShow] = useState(true);
     const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 0);
     const [expanded, setExpanded] = useState(false);
+    const {auth} = useContext(AuthContext);
 
     const triggerToggle = () => {
         setShow(!show);
@@ -61,8 +65,11 @@ const Navbar = () => {
                         </Nav.Link>
                     </Nav>
                     <Nav>
-                        <Nav.Link style={{fontSize: 18}} className="text-light" to="/auth" as={NavLink}>Вход</Nav.Link>
-                        <Nav.Link style={{fontSize: 18}} className="text-light" to="/registration" as={NavLink}>Регистрация</Nav.Link>
+                        {!auth.isAuth ? <>
+                            <Nav.Link style={{fontSize: 18}} className="text-light" to="/auth" as={NavLink}>Вход</Nav.Link>
+                            <Nav.Link style={{fontSize: 18}} className="text-light" to="/registration" as={NavLink}>Регистрация</Nav.Link>
+                        </> : <UserBar isForExpand={false}/>}
+
                     </Nav>
                 </> : <>
                     <NavbarBs.Toggle onClick={() => setExpanded(!expanded)} style={{border: 'none', outline: 'none'}} className={'border-0'} aria-controls={`offcanvasNavbar-expand-lg`} />
@@ -81,8 +88,10 @@ const Navbar = () => {
                         </Offcanvas.Header>
                         <Offcanvas.Body>
                             <Nav className="justify-content-end flex-grow-1 pe-3">
-                                <Nav.Link onClick={() => setExpanded(false)} style={{fontSize: 25}} className="text-light" to="/auth" as={NavLink}>Вход</Nav.Link>
-                                <Nav.Link onClick={() => setExpanded(false)} style={{fontSize: 25}} className="text-light" to="/registration" as={NavLink}>Регистрация</Nav.Link>
+                                {!auth.isAuth ? <>
+                                    <Nav.Link onClick={() => setExpanded(false)} style={{fontSize: 18}} className="text-light" to="/auth" as={NavLink}>Вход</Nav.Link>
+                                    <Nav.Link onClick={() => setExpanded(false)} style={{fontSize: 18}} className="text-light" to="/registration" as={NavLink}>Регистрация</Nav.Link>
+                                </> : <UserBar isForExpand={true}/>}
                                 <Nav.Link onClick={() => setExpanded(false)} style={{fontSize: 25}} className="text-light" to="/tournaments" as={NavLink}>
                                     <i style={{marginRight: 5}} className="fa fa-solid fa-trophy"></i>
                                     Турниры
@@ -116,4 +125,4 @@ const Navbar = () => {
     );
 };
 
-export default Navbar;
+export default observer(Navbar);
