@@ -19,12 +19,21 @@ model UserModel {
   email        String        @unique
   password     String
   role         String        @default("user")
+  isActivated  Boolean       @default(false)
   createdAt    DateTime      @default(now())
   RefreshToken RefreshToken?
+  ImagesModel  ImagesModel?
 }
 
 model RefreshToken {
   id     String    @id @default(uuid())
   User   UserModel @relation(fields: [userId], references: [id])
   userId String    @unique
+}
+
+model ImagesModel {
+  id     Int       @id @default(autoincrement())
+  User   UserModel @relation(fields: [userId], references: [id])
+  userId String    @unique
+  data   Bytes
 }
