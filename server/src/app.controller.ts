@@ -8,7 +8,7 @@ import {
     Delete,
     Response,
     Get,
-    Request, BadRequestException
+    Request, BadRequestException, Param
 } from '@nestjs/common';
 import {IUserService, USER_SERVICE} from "./users/user.service.interface";
 import {RegisterDto} from "./users/dto/register.dto";
@@ -21,6 +21,11 @@ export class AppController {
     constructor(
         @Inject(USER_SERVICE) private readonly userService: IUserService,
         private readonly authService: AuthService) {
+    }
+
+    @Post('confirm/:id')
+    async confirmEmail(@Param('id') id: string): Promise<void> {
+        await this.authService.confirmUser(id);
     }
 
     @Post('login')

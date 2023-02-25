@@ -34,6 +34,15 @@ export class AuthService {
         }
     }
 
+    async confirmUser(userId: string): Promise<void> {
+        const user = await this.userRepository.findById(userId);
+        if (!user || user.isActivated) {
+            throw new BadRequestException();
+        }
+
+        await this.userRepository.confirm(userId);
+    }
+
     async login({email, password}: LoginDto): Promise<{ accessToken: string; refreshToken: string; user: UserModel }> {
         const user = await this.validateUser(email, password);
         if (!user) {

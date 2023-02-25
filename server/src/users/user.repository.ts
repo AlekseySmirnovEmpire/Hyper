@@ -39,4 +39,15 @@ export class UserRepository implements IUserRepository {
         });
     }
 
+    async confirm(id: string): Promise<void> {
+        await this.prismaService.client.userModel.update({
+            where: {
+                id
+            },
+            data: {
+                isActivated: true
+            }
+        });
+    }
+
 }
