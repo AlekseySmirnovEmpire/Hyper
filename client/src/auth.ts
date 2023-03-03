@@ -73,4 +73,13 @@ export default class AuthCon {
             this.setLoading(false);
         }
     }
+
+    async confirmUser(userId: string): Promise<boolean> {
+        try {
+            const response = await axios.post<IAuthResponse>(`${API_URL}/auth/confirm/${userId}`, {withCredentials: true});
+            return response.status === 200 || response.status === 201;
+        } catch (e) {
+            return false;
+        }
+    }
 }

@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import {AuthContext} from "./main";
 import {observer} from "mobx-react-lite";
 import Error from "./pages/Error";
+import Confirm from "./pages/Confirm";
 
 const App: FC = () => {
     const {auth} = useContext(AuthContext);
@@ -35,6 +36,7 @@ const App: FC = () => {
                     <Route path="/reviews" element={<Reviews/>}/>
                     <Route path="/auth" element={!auth.isAuth ? <Auth/> : <Navigate to={'/'}/>}/>
                     <Route path="/registration" element={auth.isAuth ? <Navigate to={'/'}/> : <Registration/>}/>
+                    <Route path="/confirm/:id" element={auth.isAuth ? <Navigate to={'/'}/> : <Confirm />}/>
                     <Route path={'/error'} element={<Error/>}/>
                     <Route path="*" element={<NotFound/>}/>
                 </Routes>
