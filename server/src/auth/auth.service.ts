@@ -18,7 +18,7 @@ export class AuthService {
 
     async validateUser(email: string, password: string): Promise<UserModel | null> {
         const existedUser = await this.userRepository.find(email);
-        if (!existedUser) {
+        if (!existedUser || !existedUser.isActivated) {
             return null;
         }
         const newUser = new UserEntity(
